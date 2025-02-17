@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bookmark Manager</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      text-align: center;
+    }
+    .input-field {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+      font-size: 16px;
+    }
+    .button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      width: 100%;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .bookmark-list {
+      margin-top: 20px;
+    }
+    .bookmark-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: #e7f7e7;
+      border-radius: 5px;
+    }
+    .bookmark-item a {
+      text-decoration: none;
+      color: #333;
+    }
+    .delete-btn {
+      background-color: #f44336;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .search-bar {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Bookmark Manager</h2>
+    <input type="text" id="searchInput" class="search-bar" placeholder="Search bookmarks..." oninput="searchBookmarks()" />
+    <input type="text" id="websiteName" class="input-field" placeholder="Website Name" />
+    <input type="url" id="websiteUrl" class="input-field" placeholder="Website URL" />
+    <button class="button" onclick="saveBookmark()">Save Bookmark</button>
+
+    <div id="bookmarkList" class="bookmark-list"></div>
+  </div>
+
+  <script>
+    // Check if bookmarks exist in local storage
+    if (!localStorage.getItem('bookmarks')) {
+      localStorage.setItem('bookmarks', JSON.stringify([]));
+    }
+
+    // Load bookmarks from local storage
+    function loadBookmarks() {
+      const bookmarks = JSON.parse(localStorage.getItem('bookmarks'));
+      const bookmarkList = document.getElementById('bookmarkList');
+      bookmarkList.innerHTML = '';
+
+      bookmarks.forEach((bookmark, index) => {
+        const bookmarkItem = document.createElement('div');
+        bookmarkItem.classList.add('bookmark-item');
+        bookmarkItem.innerHTML = `
+          <a href="${bookmark.url}" target="_blank">${bookmark.name}</a>
+          <button class="delete-btn" onclick="deleteBookmark(${index})">Delete</button>
+        `;
+        bookmarkList.appendChild(bookmarkItem);
+      });
+    }
+
+    // Save bookmark to local storage
+    function saveBookmark() {
+      const websiteName = document.getElementById('websiteName').value;
+      const websiteUrl = document.getElementById('websiteUrl').value;
+
+      if (!websiteName || !websiteUrl) {
+        alert('Please enter both name and URL!');
+        return;
+      }
+
+      const newBookmark = { name: websiteName, url: websiteUrl };
+      const bookmarks = JSON.parse(localStorage.getItem('bookmarks'));
+      bookmarks.push(newBookmark);
+      localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+
+      document.getElementById('websiteName').value = '';
+      document.getElementById('websiteUrl').value = '';
+      loadBookmarks();
+    }
+
+    // Delete bookmark from local storage
+    function deleteBookmark(index) {
+      const bookmarks = JSON.parse(localStorage.getItem('bookmarks'));
+      bookmarks.splice(index, 1);
+      localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+      loadBookmarks();
+    }
+
+    // Search bookmarks
+    function searchBookmarks() {
+      const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+      const bookmarks = JSON.parse(localStorage.getItem('bookmarks'));
+      const filteredBookmarks = bookmarks.filter(bookmark => 
+        bookmark.name.toLowerCase().includes(searchQuery) || 
+        bookmark.url.toLowerCase().includes(searchQuery)
+      );
+
+      const bookmarkList = document.getElementById('bookmarkList');
+      bookmarkList.innerHTML = '';
+
+      filteredBookmarks.forEach((bookmark, index) => {
+        const bookmarkItem = document.createElement('div');
+        bookmarkItem.classList.add('bookmark-item');
+        bookmarkItem.innerHTML = `
+          <a href="${bookmark.url}" target="_blank">${bookmark.name}</a>
+          <button class="delete-btn" onclick="deleteBookmark(${index})">Delete</button>
+        `;
+        bookmarkList.appendChild(bookmarkItem);
+      });
+    }
+
+    // Initialize bookmarks on page load
+    loadBookmarks();
+  </script>
+
+</body>
+</html>
